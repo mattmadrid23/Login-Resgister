@@ -42,6 +42,7 @@ private EditText contraseña;
     static String clave="jesusmadridgomez";
     byte[] encriptada = new byte[0];
     String desencriptada;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,8 +81,8 @@ registrar.setOnClickListener(new View.OnClickListener() {
             SecretKey secret = generateKey();
             encriptada= encryptMsg(contraseñña,secret);
             desencriptada=decrryptMsg(encriptada,secret);
-            Toast.makeText(getApplicationContext(),"encriptada"+encriptada,Toast.LENGTH_LONG).show();
-            Toast.makeText(getApplicationContext(),"desencriptada"+desencriptada,Toast.LENGTH_LONG).show();
+           // Toast.makeText(getApplicationContext(),"encriptada"+encriptada,Toast.LENGTH_LONG).show();
+           // Toast.makeText(getApplicationContext(),"desencriptada"+desencriptada,Toast.LENGTH_LONG).show();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         } catch (NoSuchPaddingException e) {
@@ -114,7 +115,7 @@ registrar.setOnClickListener(new View.OnClickListener() {
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
                                 // Sign in success, update UI with the signed-in user's information
-                                Toast.makeText(MainActivity.this, "Se ha logueado el usuario con el email: " + nombre.getText().toString(), Toast.LENGTH_LONG).show();
+                              //  Toast.makeText(MainActivity.this, "Se ha logueado el usuario con el email: " + nombre.getText().toString(), Toast.LENGTH_LONG).show();
                                 FirebaseUser user = mAuth.getCurrentUser();
                                 Intent ob=new Intent(getApplicationContext(),Home.class);
                                 startActivity(ob);
