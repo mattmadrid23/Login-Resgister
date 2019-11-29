@@ -81,8 +81,7 @@ registrar.setOnClickListener(new View.OnClickListener() {
             SecretKey secret = generateKey();
             encriptada= encryptMsg(contraseñña,secret);
             desencriptada=decrryptMsg(encriptada,secret);
-           // Toast.makeText(getApplicationContext(),"encriptada"+encriptada,Toast.LENGTH_LONG).show();
-           // Toast.makeText(getApplicationContext(),"desencriptada"+desencriptada,Toast.LENGTH_LONG).show();
+
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         } catch (NoSuchPaddingException e) {

@@ -54,18 +54,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewEmail" />
 
-    <TextView
-        android:id="@+id/textViewlongitud"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="140dp"
-        android:layout_marginTop="32dp"
-        android:text="LON"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/textViewLatitud"
-        app:layout_constraintTop_toBottomOf="@+id/textViewEmail" />
-
     <EditText
         android:id="@+id/editTextGet1"
         android:layout_width="119dp"
@@ -121,7 +109,7 @@
         android:layout_marginTop="24dp"
         android:text="Get"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.4"
+        app:layout_constraintHorizontal_bias="0.41"
         app:layout_constraintStart_toEndOf="@+id/botonGet1"
-        app:layout_constraintTop_toBottomOf="@+id/textViewlongitud" />
+        app:layout_constraintTop_toBottomOf="@+id/textViewLatitud" />
 </androidx.constraintlayout.widget.ConstraintLayout>

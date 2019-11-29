@@ -16,39 +16,47 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.android.gms.location.LocationListener;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class Home extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener,
-        GoogleApiClient.ConnectionCallbacks{
+        GoogleApiClient.ConnectionCallbacks, LocationListener{
     private EditText get1;
     private EditText get2;
     private TextView nombres;
     private TextView correo;
     private TextView latitud;
-    private TextView longitud;
+   // private TextView longitud;
     private String name;
     private String email;
     private static final String LOGTAG = "android-localizacion";
-
+   // private GoogleApiClient googleApiClient;
+    private  LocationRequest locationRequest;
+ //private static final int PETITION_PERMIT_LOCATION = 101;
+    private static final int UPDATE_INTERVAL_IN_MILLISECONDS = 500;
+    public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =500;
     private static final int PETICION_PERMISO_LOCALIZACION = 101;
 
     private GoogleApiClient apiClient;
-
+   private DatabaseReference mDatabase;// ...
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         nombres = (TextView) findViewById(R.id.textViewNombres);
         correo = (TextView) findViewById(R.id.textViewEmail);
         latitud = (TextView) findViewById(R.id.textViewLatitud);
-        longitud = (TextView) findViewById(R.id.textViewlongitud);
+       // longitud = (TextView) findViewById(R.id.textViewlongitud);
         Button botonget1 = (Button) findViewById(R.id.botonGet1);
         Button botonget2 = (Button) findViewById(R.id.botonGet2);
         Button salvar = (Button) findViewById(R.id.botonSalvar);
         get1 = (EditText) findViewById(R.id.editTextGet1);
         get2 = (EditText) findViewById(R.id.editTextGet2);
-
+        locationRequest= new LocationRequest();
         //Construcción cliente API Google
         apiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this, this)
@@ -62,7 +70,8 @@ public class Home extends AppCompatActivity implements GoogleApiClient.OnConnect
 
         salvar.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-
+                //escribimos en la BD
+                escribir(name,email);
             }
         });
 
@@ -72,11 +81,13 @@ public class Home extends AppCompatActivity implements GoogleApiClient.OnConnect
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
             // Name, email address, and profile photo Url
-            name = user.getDisplayName();
+            name=user.getUid();
+            // name = user.getDisplayName();
             email = user.getEmail();
             Uri photoUrl = user.getPhotoUrl();
             nombres.setText(name);
             correo.setText(email);
+
             // Check if user's email is verified
             boolean emailVerified = user.isEmailVerified();
 
@@ -87,6 +98,21 @@ public class Home extends AppCompatActivity implements GoogleApiClient.OnConnect
         }
     }
 
+    private void leer(){
+               mDatabase = FirebaseDatabase.getInstance().getReference();
+
+    }
+    private void escribir(String userId, String email) {
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        mDatabase.child("User").child("UID").setValue(userId);
+        mDatabase.child("User").child("Email").setValue(email);
+        Toast.makeText(getApplicationContext(),"ID"+userId+"Guardado exitosamente",Toast.LENGTH_LONG).show();
+
+        //FirebaseDatabase database = FirebaseDatabase.getInstance();
+       // DatabaseReference myRef = database.getReference("message");
+
+        //myRef.setValue("Hello, World!");
+    }
 
     @Override
     public void onConnectionFailed(ConnectionResult result) {
@@ -107,7 +133,7 @@ public class Home extends AppCompatActivity implements GoogleApiClient.OnConnect
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     PETICION_PERMISO_LOCALIZACION);
         } else {
-
+           updateLocation();
             Location lastLocation =
                     LocationServices.FusedLocationApi.getLastLocation(apiClient);
 
@@ -124,11 +150,11 @@ public class Home extends AppCompatActivity implements GoogleApiClient.OnConnect
 
     private void updateUI(Location loc) {
         if (loc != null) {
-            latitud.setText("Latitud: "+String.valueOf(loc.getLatitude()));
-            longitud.setText("Longitud: " + String.valueOf(loc.getLongitude()));
+            latitud.setText("Longitud: " + String.valueOf(loc.getLongitude()+ " Latitud: "+String.valueOf(loc.getLatitude())));
+            //longitud.setText("Longitud: " + String.valueOf(loc.getLongitude()));
         } else {
-            latitud.setText("Latitud: (desconocida)");
-            longitud.setText("Longitud: (desconocida)");
+            latitud.setText("Latitud o Longitud: (desconocida)");
+            //longitud.setText("Longitud: (desconocida)");
         }
     }
 
@@ -155,4 +181,17 @@ public class Home extends AppCompatActivity implements GoogleApiClient.OnConnect
         }
     }
 
+    private void updateLocation(){
+        locationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
+        locationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        LocationServices.FusedLocationApi.requestLocationUpdates(apiClient, locationRequest, this);
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        updateLocation();
+        updateUI(location);
+    }
 }

@@ -153,7 +153,6 @@ public class Registrar extends AppCompatActivity {
                                 progressDialog.dismiss();
                             }
                         });
-
             }
         } else Toast.makeText(this, "Las contraseñas no coinciden, intente de nuevo", Toast.LENGTH_LONG).show();//else
                                 }
