@@ -1,12 +1,17 @@
 package com.example.security;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -21,15 +26,24 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
+import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.KeySpec;
+import java.util.Base64;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class Registrar extends AppCompatActivity {
@@ -41,8 +55,9 @@ public class Registrar extends AppCompatActivity {
     private EditText etcontraseña;
     private EditText etconfirmacionC;
     static String clave="jesusmadridgomez";
-    byte[] encriptada = new byte[0];
-    String desencriptada;
+    private static String salt = "ssshhhhhhhhhhh!!!!";
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,6 +87,7 @@ public class Registrar extends AppCompatActivity {
             }
         });
 
+
         progressDialog = new ProgressDialog(this);
 
 
@@ -85,8 +101,16 @@ public class Registrar extends AppCompatActivity {
         String confirmar = etconfirmacionC.getText().toString().trim();
 
         //encriptamos la contraseña
+        //String originalString = "howtodoinjava.com";
 
-        try {
+        String encryptedString = encrypt(contraseña, clave) ;
+        String decryptedString = decrypt(encryptedString, clave) ;
+
+
+        System.out.println(contraseña);
+        System.out.println("encriptado: "+encryptedString);
+        System.out.println("desencriptado: "+decryptedString);
+       /* try {
             SecretKey secret = generateKey();
            encriptada= encryptMsg(contraseña,secret);
             desencriptada=decrryptMsg(encriptada,secret);
@@ -105,7 +129,7 @@ public class Registrar extends AppCompatActivity {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-
+*/
 
         //Verificamos que las cajas de texto no esten vacías
         if (TextUtils.isEmpty(correo)) {
@@ -136,7 +160,7 @@ public class Registrar extends AppCompatActivity {
 
             if (currentUser != null) {
 
-                mAuth.createUserWithEmailAndPassword(correo, desencriptada)
+                mAuth.createUserWithEmailAndPassword(correo, decryptedString)
                         .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
@@ -158,10 +182,11 @@ public class Registrar extends AppCompatActivity {
                                 }
 
 //clave
+    /*
+
 public static SecretKey generateKey()throws NoSuchAlgorithmException, InvalidKeyException{
         return secret = new SecretKeySpec(clave.getBytes(),"AES");
 }
-
 
 //encriptar
 public static byte[] encryptMsg(String message, SecretKey secret) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidParameterException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
@@ -180,5 +205,59 @@ public static byte[] encryptMsg(String message, SecretKey secret) throws NoSuchA
         String decryptString = new String(cipher.doFinal(cipherText), "UTF-8");
         return decryptString;
     }
+
+*/
+//nuevos metodos de encriptar y desencriptar AES
+    public static String encrypt(String strToEncrypt, String secret)
+    {
+        try
+        {
+            byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            IvParameterSpec ivspec = new IvParameterSpec(iv);
+
+            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+            KeySpec spec = new PBEKeySpec(secret.toCharArray(), salt.getBytes(), 65536, 256);
+            SecretKey tmp = factory.generateSecret(spec);
+            SecretKeySpec secretKey = new SecretKeySpec(tmp.getEncoded(), "AES");
+
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivspec);
+            //return Base64.getEncoder().encodeToString(cipher.doFinal(strToEncrypt.getBytes("UTF-8")));
+            return Base64.getEncoder().encodeToString(cipher.doFinal(strToEncrypt.getBytes("UTF-8")));
+            //return Base64.getEncoder().encodeToString(cipher.doFinal(strToEncrypt.getBytes("UTF-8")));
+
+        }
+        catch (Exception e)
+        {
+            System.out.println("Error while encrypting: " + e.toString());
+        }
+        return null;
+    }
+
+
+
+    public static String decrypt(String strToDecrypt, String secret) {
+        try
+        {
+            byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            IvParameterSpec ivspec = new IvParameterSpec(iv);
+
+            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+            KeySpec spec = new PBEKeySpec(secret.toCharArray(), salt.getBytes(), 65536, 256);
+            SecretKey tmp = factory.generateSecret(spec);
+            SecretKeySpec secretKey = new SecretKeySpec(tmp.getEncoded(), "AES");
+
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, ivspec);
+            return new String(cipher.doFinal(Base64.getDecoder().decode(strToDecrypt)));
+        }
+        catch (Exception e) {
+            System.out.println("Error while decrypting: " + e.toString());
+        }
+        return null;
+    }
+
+
+
 
 }
