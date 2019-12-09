@@ -82,7 +82,7 @@ public class Registrar extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                registrarUsuario();
+                registrarUsuario("Jesus Madrid","1234567uid");
 
             }
         });
@@ -95,8 +95,8 @@ public class Registrar extends AppCompatActivity {
     }
 
 
-    private void registrarUsuario(){
-        String correo = etemail.getText().toString().trim();
+    private void registrarUsuario(final String nombre, final String uuid){
+        final String correo = etemail.getText().toString().trim();
         String contraseña = etcontraseña.getText().toString().trim();
         String confirmar = etconfirmacionC.getText().toString().trim();
 
@@ -168,6 +168,8 @@ public class Registrar extends AppCompatActivity {
                                 if (task.isSuccessful()) {
                                     Toast.makeText(Registrar.this, "Se ha registrado el usuario con el email: " + etemail.getText(), Toast.LENGTH_LONG).show();
                                     FirebaseUser user = mAuth.getCurrentUser();
+                                    DBHelper obHelper = new DBHelper(getApplicationContext());
+                                    obHelper.insert(nombre,correo,uuid,getApplicationContext());
                                     Intent ob = new Intent(getApplicationContext(), MainActivity.class);
                                     startActivity(ob);
                                 } else {
