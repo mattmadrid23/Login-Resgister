@@ -47,7 +47,7 @@ private EditText nombre;
 private EditText contraseña;
     private static SecretKeySpec secret;
     static String clave="jesusmadridgomez";
-    private static String salt = "ssshhhhhhhhhhh!!!!";
+    private static String salt = "codigoparaelsalt12";
 
 
     @Override
@@ -87,7 +87,7 @@ registrar.setOnClickListener(new View.OnClickListener() {
         startActivity(ob);
     }
 });
-
+        progressDialog = new ProgressDialog(this);
     }
     private void login(){
         String correo = nombre.getText().toString().trim();
@@ -141,7 +141,8 @@ registrar.setOnClickListener(new View.OnClickListener() {
             Toast.makeText(this, "Falta ingresar la contraseña", Toast.LENGTH_LONG).show();
             return;
         }
-
+        progressDialog.setMessage("Logueando...");
+        progressDialog.show();
 
             mAuth.signInWithEmailAndPassword(correo,decryptedString)
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -149,7 +150,7 @@ registrar.setOnClickListener(new View.OnClickListener() {
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
                                 // Sign in success, update UI with the signed-in user's information
-                              //  Toast.makeText(MainActivity.this, "Se ha logueado el usuario con el email: " + nombre.getText().toString(), Toast.LENGTH_LONG).show();
+
                                 FirebaseUser user = mAuth.getCurrentUser();
                                 Intent ob=new Intent(getApplicationContext(),Home.class);
                                 startActivity(ob);
@@ -160,7 +161,7 @@ registrar.setOnClickListener(new View.OnClickListener() {
 
                             }
 
-                            // ...
+                            progressDialog.dismiss();
                         }
                     });
 
@@ -189,7 +190,7 @@ registrar.setOnClickListener(new View.OnClickListener() {
         return decryptString;
     }
 */
-    //nuevos metodos de encriptar y desencriptar AES
+    //nuevos metodos de encriptar y desencriptar AES Generico
     public static String encrypt(String strToEncrypt, String secret)
     {
         try

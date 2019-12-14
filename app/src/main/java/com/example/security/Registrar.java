@@ -82,7 +82,9 @@ public class Registrar extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                registrarUsuario("Jesus Madrid","1234567uid");
+
+                //Este nombre como es opcional lo pase como parametro, pero puede pasarse en la iinterfaz registrar.
+                registrarUsuario("Jesus Madrid");
 
             }
         });
@@ -95,7 +97,7 @@ public class Registrar extends AppCompatActivity {
     }
 
 
-    private void registrarUsuario(final String nombre, final String uuid){
+    private void registrarUsuario(final String nombre){
         final String correo = etemail.getText().toString().trim();
         String contraseña = etcontraseña.getText().toString().trim();
         String confirmar = etconfirmacionC.getText().toString().trim();
@@ -168,8 +170,9 @@ public class Registrar extends AppCompatActivity {
                                 if (task.isSuccessful()) {
                                     Toast.makeText(Registrar.this, "Se ha registrado el usuario con el email: " + etemail.getText(), Toast.LENGTH_LONG).show();
                                     FirebaseUser user = mAuth.getCurrentUser();
+
                                     DBHelper obHelper = new DBHelper(getApplicationContext());
-                                    obHelper.insert(nombre,correo,uuid,getApplicationContext());
+                                    obHelper.insert(nombre,correo,user.getUid(),getApplicationContext());
                                     Intent ob = new Intent(getApplicationContext(), MainActivity.class);
                                     startActivity(ob);
                                 } else {
@@ -209,7 +212,7 @@ public static byte[] encryptMsg(String message, SecretKey secret) throws NoSuchA
     }
 
 */
-//nuevos metodos de encriptar y desencriptar AES
+//nuevos metodos de encriptar y desencriptar AES Generico
     public static String encrypt(String strToEncrypt, String secret)
     {
         try
